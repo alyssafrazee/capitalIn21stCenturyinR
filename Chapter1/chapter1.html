@@ -1,0 +1,85 @@
+<h1 id="capital-in-the-21st-century-chapter-1">Capital in the 21st Century: Chapter 1</h1>
+<h3 id="data-provenance">Data provenance</h3>
+<p>The data were downloaded as Excel files from: http://piketty.pse.ens.fr/en/capital21c2.</p>
+<h3 id="loading-relevant-libraries-and-data">Loading relevant libraries and data</h3>
+<p>This document depends on the <a href="http://cran.r-project.org/web/packages/xlsx/index.html">xlsx</a> package.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(xlsx)
+
+fig1s1_dat =<span class="st"> </span><span class="kw">read.xlsx</span>(
+    <span class="st">&quot;./Piketty2014FiguresTables/Chapter1TablesFigures.xlsx&quot;</span>, 
+    <span class="dt">sheetName=</span><span class="st">&quot;TS1.1a&quot;</span>, <span class="dt">rowIndex=</span><span class="dv">7</span>:<span class="dv">18</span>, <span class="dt">colIndex=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>:<span class="dv">6</span>), <span class="dt">header=</span><span class="ot">TRUE</span>)
+<span class="kw">names</span>(fig1s1_dat)[<span class="dv">1</span>] =<span class="st"> &quot;Year&quot;</span> 
+fig1s1_dat$EAm =<span class="st"> </span>fig1s1_dat$Europe+fig1s1_dat$America
+fig1s1_dat$EAmAf =<span class="st"> </span>fig1s1_dat$EAm+fig1s1_dat$Africa</code></pre>
+<h2 id="figure-f1.1">Figure F1.1</h2>
+<p>This code remakes Figure F1.1, scaling time on the x-axis linearly:</p>
+<pre class="sourceCode r"><code class="sourceCode r">plotdat =<span class="st"> </span><span class="kw">subset</span>(fig1s1_dat, Year&gt;=<span class="dv">1700</span>) <span class="co">#take out years before 1700</span>
+cbPalette &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;#999999&quot;</span>, <span class="st">&quot;#E69F00&quot;</span>, <span class="st">&quot;#56B4E9&quot;</span>, <span class="st">&quot;#009E73&quot;</span>, <span class="st">&quot;#F0E442&quot;</span>, 
+    <span class="st">&quot;#0072B2&quot;</span>, <span class="st">&quot;#D55E00&quot;</span>, <span class="st">&quot;#CC79A7&quot;</span>) <span class="co">#ggplot2 recommended colorblind palette</span>
+<span class="kw">plot</span>(plotdat$Year, <span class="kw">rep</span>(<span class="dv">0</span>, <span class="kw">nrow</span>(plotdat)), 
+    <span class="dt">type=</span><span class="st">&#39;n&#39;</span>, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="dt">xlab=</span><span class="st">&quot;Year&quot;</span>, <span class="dt">ylab=</span><span class="st">&#39;World Output&#39;</span>)
+yearRevYear =<span class="st"> </span><span class="kw">c</span>(plotdat$Year, <span class="kw">rev</span>(plotdat$Year))
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">0</span>, <span class="kw">nrow</span>(plotdat)), <span class="kw">rev</span>(plotdat$Europe)), <span class="dt">col=</span>cbPalette[<span class="dv">2</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(plotdat$Europe, <span class="kw">rev</span>(plotdat$EAm)), <span class="dt">col=</span>cbPalette[<span class="dv">3</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(plotdat$EAm, <span class="kw">rev</span>(plotdat$EAmAf)), <span class="dt">col=</span>cbPalette[<span class="dv">5</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(plotdat$EAmAf, <span class="kw">rep</span>(<span class="dv">1</span>, <span class="kw">nrow</span>(plotdat))), <span class="dt">col=</span>cbPalette[<span class="dv">1</span>])
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.9</span>, <span class="st">&#39;Asia&#39;</span>)
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.764</span>, <span class="st">&#39;Africa&#39;</span>)
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.55</span>, <span class="st">&#39;America&#39;</span>)
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.2</span>, <span class="st">&#39;Europe&#39;</span>)
+<span class="kw">title</span>(<span class="st">&quot;World Output, 1700-2012 (linear time scale)&quot;</span>)</code></pre>
+<div class="figure">
+<img src="figure/p1.png" />
+</div>
+<p>This code remakes Figure F1.1 as it appears in the original analysis: data points on the x-axis are equally spaced, no matter how far apart in time they are:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="dv">1</span>:<span class="dv">8</span>, <span class="kw">rep</span>(<span class="dv">0</span>,<span class="dv">8</span>), <span class="dt">type=</span><span class="st">&#39;n&#39;</span>, <span class="dt">xaxt=</span><span class="st">&#39;n&#39;</span>, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="dt">xlab=</span><span class="st">&quot;Year&quot;</span>, 
+    <span class="dt">ylab=</span><span class="st">&#39;World Output&#39;</span>)
+<span class="kw">axis</span>(<span class="dt">side=</span><span class="dv">1</span>, <span class="dt">at=</span><span class="dv">1</span>:<span class="dv">8</span>, <span class="dt">labels=</span>plotdat$Year)
+xcoords =<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">8</span>, <span class="dv">8</span>:<span class="dv">1</span>)
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">0</span>,<span class="dv">8</span>), <span class="kw">rev</span>(plotdat$Europe)), <span class="dt">col=</span>cbPalette[<span class="dv">2</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(plotdat$Europe, <span class="kw">rev</span>(plotdat$EAm)), <span class="dt">col=</span>cbPalette[<span class="dv">3</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(plotdat$EAm, <span class="kw">rev</span>(plotdat$EAmAf)), <span class="dt">col=</span>cbPalette[<span class="dv">5</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(plotdat$EAmAf, <span class="kw">rep</span>(<span class="dv">1</span>,<span class="dv">8</span>)), <span class="dt">col=</span>cbPalette[<span class="dv">1</span>])
+<span class="kw">text</span>(<span class="dv">5</span>, <span class="fl">0.9</span>, <span class="st">&#39;Asia&#39;</span>)
+<span class="kw">text</span>(<span class="dv">5</span>, <span class="fl">0.764</span>, <span class="st">&#39;Africa&#39;</span>)
+<span class="kw">text</span>(<span class="dv">5</span>, <span class="fl">0.55</span>, <span class="st">&#39;America&#39;</span>)
+<span class="kw">text</span>(<span class="dv">5</span>, <span class="fl">0.2</span>, <span class="st">&#39;Europe&#39;</span>)
+<span class="kw">title</span>(<span class="st">&quot;World Output, 1700-2012 (original x-axis)&quot;</span>)</code></pre>
+<div class="figure">
+<img src="figure/unnamed-chunk-1.png" />
+</div>
+<h2 id="figure-s1.1">Figure S1.1</h2>
+<p>This code remakes Figure S1.1, scaling time on the x-axis linearly:</p>
+<pre class="sourceCode r"><code class="sourceCode r">cbPalette &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;#999999&quot;</span>, <span class="st">&quot;#E69F00&quot;</span>, <span class="st">&quot;#56B4E9&quot;</span>, <span class="st">&quot;#009E73&quot;</span>, <span class="st">&quot;#F0E442&quot;</span>, <span class="st">&quot;#0072B2&quot;</span>, <span class="st">&quot;#D55E00&quot;</span>, <span class="st">&quot;#CC79A7&quot;</span>)
+<span class="kw">plot</span>(fig1s1_dat$Year, <span class="kw">rep</span>(<span class="dv">0</span>,<span class="kw">nrow</span>(fig1s1_dat)), 
+    <span class="dt">type=</span><span class="st">&#39;n&#39;</span>, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="dt">xlab=</span><span class="st">&quot;Year&quot;</span>, <span class="dt">ylab=</span><span class="st">&#39;World Output&#39;</span>)
+yearRevYear =<span class="st"> </span><span class="kw">c</span>(fig1s1_dat$Year, <span class="kw">rev</span>(fig1s1_dat$Year))
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">0</span>,<span class="kw">nrow</span>(fig1s1_dat)), <span class="kw">rev</span>(fig1s1_dat$Europe)), <span class="dt">col=</span>cbPalette[<span class="dv">2</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(fig1s1_dat$Europe, <span class="kw">rev</span>(fig1s1_dat$EAm)), <span class="dt">col=</span>cbPalette[<span class="dv">3</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(fig1s1_dat$EAm, <span class="kw">rev</span>(fig1s1_dat$EAmAf)), <span class="dt">col=</span>cbPalette[<span class="dv">5</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>yearRevYear, <span class="dt">y=</span><span class="kw">c</span>(fig1s1_dat$EAmAf, <span class="kw">rep</span>(<span class="dv">1</span>, <span class="kw">nrow</span>(fig1s1_dat))), <span class="dt">col=</span>cbPalette[<span class="dv">1</span>])
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.9</span>, <span class="st">&#39;Asia&#39;</span>)
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.764</span>, <span class="st">&#39;Africa&#39;</span>)
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.55</span>, <span class="st">&#39;America&#39;</span>)
+<span class="kw">text</span>(<span class="dv">1950</span>, <span class="fl">0.2</span>, <span class="st">&#39;Europe&#39;</span>)
+<span class="kw">title</span>(<span class="st">&quot;Distribution of World Output, 0-2012 (linear time scale)&quot;</span>)</code></pre>
+<div class="figure">
+<img src="figure/unnamed-chunk-2.png" />
+</div>
+<p>And this code remakes Figure S1.1, scaling time as it was scaled in the original figure:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="dv">1</span>:<span class="dv">11</span>, <span class="kw">rep</span>(<span class="dv">0</span>,<span class="dv">11</span>), <span class="dt">type=</span><span class="st">&#39;n&#39;</span>, <span class="dt">xaxt=</span><span class="st">&#39;n&#39;</span>, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="dt">xlab=</span><span class="st">&quot;Year&quot;</span>, 
+    <span class="dt">ylab=</span><span class="st">&#39;World Output&#39;</span>)
+<span class="kw">axis</span>(<span class="dt">side=</span><span class="dv">1</span>, <span class="dt">at=</span><span class="dv">1</span>:<span class="dv">11</span>, <span class="dt">labels=</span>fig1s1_dat$Year)
+xcoords =<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">11</span>, <span class="dv">11</span>:<span class="dv">1</span>)
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">0</span>,<span class="dv">11</span>), <span class="kw">rev</span>(fig1s1_dat$Europe)), <span class="dt">col=</span>cbPalette[<span class="dv">2</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(fig1s1_dat$Europe, <span class="kw">rev</span>(fig1s1_dat$EAm)), <span class="dt">col=</span>cbPalette[<span class="dv">3</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(fig1s1_dat$EAm, <span class="kw">rev</span>(fig1s1_dat$EAmAf)), <span class="dt">col=</span>cbPalette[<span class="dv">5</span>])
+<span class="kw">polygon</span>(<span class="dt">x=</span>xcoords, <span class="dt">y=</span><span class="kw">c</span>(fig1s1_dat$EAmAf, <span class="kw">rep</span>(<span class="dv">1</span>,<span class="dv">11</span>)), <span class="dt">col=</span>cbPalette[<span class="dv">1</span>])
+<span class="kw">text</span>(<span class="dv">8</span>, <span class="fl">0.9</span>, <span class="st">&#39;Asia&#39;</span>)
+<span class="kw">text</span>(<span class="dv">8</span>, <span class="fl">0.764</span>, <span class="st">&#39;Africa&#39;</span>)
+<span class="kw">text</span>(<span class="dv">8</span>, <span class="fl">0.55</span>, <span class="st">&#39;America&#39;</span>)
+<span class="kw">text</span>(<span class="dv">8</span>, <span class="fl">0.2</span>, <span class="st">&#39;Europe&#39;</span>)
+<span class="kw">title</span>(<span class="st">&quot;Distribution of World Output, 0-2012 (original x-axis)&quot;</span>)</code></pre>
+<div class="figure">
+<img src="figure/unnamed-chunk-3.png" />
+</div>
